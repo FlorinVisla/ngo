@@ -1,0 +1,12 @@
+# https://springdoc.org/properties.html
+springdoc:
+  api-docs:
+    path: /ngos-api
+
+  swagger-ui:
+    operationsSorter: "method"
+
+
+server:
+  error:
+    include-message: "always"
