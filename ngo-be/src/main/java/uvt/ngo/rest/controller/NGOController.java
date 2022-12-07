@@ -52,36 +52,40 @@ public class NGOController {
                         .build();
     }
 
-    public NGOResponse modifyNgo(final String id, final String description, final String address, final String founded,
-                         final String website, final String imageUrl, final Integer priority, final String areas) {
+    public NGOResponse modifyNgo(final String name, final String id, final String description, final String address,
+                                 final String location, final String founded,final String website, final String imageUrl,
+                                 final Integer priority, final String areas) {
         final String dbId = StringUtils.isEmpty(id) ? RandomStringUtils.randomAlphabetic(20) : id;
         final NGO ngo = ngoRepository.findById(dbId)
                 .orElse(new NGO());
 
-        getNgo(description, address, founded, website, imageUrl, priority, areas, id, ngo, true);
+        getNgo(name, description, address, location, founded, website, imageUrl, priority, areas, dbId, ngo, true);
         return NGOResponse.builder()
                 .message("Added/Modified NGO with id:" + dbId)
                 .ngos(Collections.singletonList(ngo))
                 .build();
     }
 
-    public NGOResponse addNgo(final String description, final String address, final String founded,
-                      final String website, final String imageUrl, final Integer priority, final String areas) {
+    public NGOResponse addNgo(final String name, final String description, final String address, final String location,
+                              final String founded, final String website, final String imageUrl, final Integer priority,
+                              final String areas) {
         final String dbId = RandomStringUtils.randomAlphabetic(20);
         final NGO ngo = new NGO();
 
-        getNgo(description, address, founded, website, imageUrl, priority, areas, dbId, ngo, false);
+        getNgo(name, description, address, location, founded, website, imageUrl, priority, areas, dbId, ngo, false);
         return NGOResponse.builder()
                 .message("Added/Modified NGO with id:" + dbId)
                 .ngos(Collections.singletonList(ngo))
                 .build();
     }
 
-    private void getNgo(String description, String address, String founded, String website, String imageUrl,
+    private void getNgo(String name, String description, String address, String location, String founded, String website, String imageUrl,
                         Integer priority, String areas, String dbId, NGO ngo, final Boolean approved) {
         ngo.setId(dbId);
+        ngo.setName(name);
         ngo.setDescription(description);
         ngo.setAddress(address);
+        ngo.setLocation(location);
         ngo.setFounded(founded);
         ngo.setWebsite(website);
         ngo.setImageUrl(imageUrl);
@@ -89,7 +93,7 @@ public class NGOController {
         ngo.setApproved(approved);
 
         final List<String> areasAsList = List.of(areas.split(","));
-        ngo.setIssueAreaList(areasAsList.stream().map(IssueArea::valueOf).collect(Collectors.toList()));
+        ngo.setIssueAreaList(areasAsList.stream().filter(StringUtils::isNotEmpty).map(IssueArea::valueOf).collect(Collectors.toList()));
 
         ngoRepository.save(ngo);
     }

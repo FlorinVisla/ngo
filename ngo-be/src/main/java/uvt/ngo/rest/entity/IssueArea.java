@@ -6,6 +6,7 @@ import lombok.Getter;
 @AllArgsConstructor
 @Getter
 public enum IssueArea {
+	NGO("NGO"),
 	HEALTH("HEALTH"), // ALL THESE ENUMS GIVE ERROR, FOR NO CONSTRUCTOR
 	FINANCE("FINANCE"),
 	ECONOMIC_DEVELOPMENT("ECONOMIC_DEVELOPMENT"),

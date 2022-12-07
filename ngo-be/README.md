@@ -1,7 +1,5 @@
 # proiectPW
-PW university project
-
-Something something template
+PI university project
 
 #First
 ./mvnw clean package
