@@ -34,6 +34,13 @@ public class NGOApi {
         return ngoController.getNgos(authController.getUserType(apiKey));
     }
 
+    @Operation(summary = "Fetches details about highest priority NGOs", tags = "NGO endpoints")
+    @CrossOrigin(origins = "http://localhost:3000")
+    @GetMapping("/prioNgos")
+    public NGOResponse getPrioNgos(@RequestParam(value = "api-key") final String apiKey) {
+        return ngoController.getPrioNgos(authController.getUserType(apiKey));
+    }
+
     /*
     This would be sent for approval if the user is not an admin
     This would be sent directly to the database if the user is an admin

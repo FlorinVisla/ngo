@@ -11,17 +11,18 @@ import uvt.ngo.rest.entity.IssueArea;
 import uvt.ngo.rest.entity.NGO;
 import uvt.ngo.rest.entity.NGOResponse;
 import uvt.ngo.rest.entity.UserType;
+import uvt.ngo.rest.util.BinomialHeap;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
+
+import static uvt.ngo.rest.util.PatternAutomata.search;
 
 @Controller
 public class NGOController {
 
     final Logger logger = LoggerFactory.getLogger(NGOController.class);
+    final ArrayList<String> forbiddenWords = new ArrayList<>(List.of("poop", "zdoop"));
 
     @Autowired
     private NgoRepository ngoRepository;
@@ -52,6 +53,35 @@ public class NGOController {
                         .build();
     }
 
+    public NGOResponse getPrioNgos(UserType userType) {
+        final List<NGO> listOfNgos = ngoRepository.findAll();
+
+        return userType.equals(UserType.ADMIN) ?
+                NGOResponse.builder()
+                        .message("All present NGOs, including the unapproved ones")
+                        .ngos(getPrioNgosBasedOnHeap(listOfNgos)).build()
+                :
+                NGOResponse.builder()
+                        .message("All present NGOs, except the unapproved ones")
+                        .ngos(getPrioNgosBasedOnHeap(listOfNgos).stream().filter(NGO::getApproved).collect(Collectors.toList()))
+                        .build();
+    }
+
+    /**
+     * This method is quite useless in the scope of the project
+     * But was introduced in order to prove a concept for SDA
+     * @param listOfNgos
+     * @return
+     */
+    private List<NGO> getPrioNgosBasedOnHeap(List<NGO> listOfNgos) {
+        final BinomialHeap binomialHeap = new BinomialHeap();
+        listOfNgos.stream().forEach(binomialHeap::insert);
+        int min = binomialHeap.extractMin();
+
+        return listOfNgos.stream().filter(e -> e.getPriority() == min).collect(Collectors.toList());
+
+    }
+
     public NGOResponse modifyNgo(final String name, final String id, final String description, final String address,
                                  final String location, final String founded,final String website, final String imageUrl,
                                  final Integer priority, final String areas) {
@@ -72,6 +102,13 @@ public class NGOController {
         final String dbId = RandomStringUtils.randomAlphabetic(20);
         final NGO ngo = new NGO();
 
+        boolean hasForbidden = forbiddenWords.stream().anyMatch(e -> search(e.toCharArray(), description.toCharArray()));
+        if (hasForbidden) {
+            return NGOResponse.builder()
+                    .message("The description contains forbidden words. Cannot be send for approval!")
+                    .build();
+        }
+
         getNgo(name, description, address, location, founded, website, imageUrl, priority, areas, dbId, ngo, false);
         return NGOResponse.builder()
                 .message("Added/Modified NGO with id:" + dbId)
@@ -80,7 +117,7 @@ public class NGOController {
     }
 
     private void getNgo(String name, String description, String address, String location, String founded, String website, String imageUrl,
-                        Integer priority, String areas, String dbId, NGO ngo, final Boolean approved) {
+                        Integer priority, String areas, String dbId, NGO ngo, Boolean approved) {
         ngo.setId(dbId);
         ngo.setName(name);
         ngo.setDescription(description);

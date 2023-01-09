@@ -51,7 +51,7 @@ class NGO extends React.Component {
                     {ngos.map((item) => (
                             <div className="card d-inline" style={{"width": "30rem", "margin": "10px"}}>
                                 <img className="card-img-top" src={item.imageUrl} alt="Card image cap"
-                                     />
+                                     style={{"maxHeight": "300px"}}/>
                                 <div className="card-body">
                                     <h5 className="card-title">{item.name}</h5>
                                     <p className="card-text">{item.description}</p>
